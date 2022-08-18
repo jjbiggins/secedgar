@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import time
 import os
 import sys
 import config
@@ -10,15 +11,12 @@ from urllib.request import urlopen
 import sqlite3
 
 
-
-
 CREATE_TABLE_SQL = """CREATE TABLE IF NOT EXISTS public_companies(
                         id integer PRIMARY KEY,
                         cik integer,
                         name text,
                         ticker text,
                         exchange text);"""
-
 
 
 def create_connection(db_file):
@@ -37,7 +35,6 @@ def create_connection(db_file):
     return conn
 
 
-
 def create_table(conn, CREATE_TABLE_SQL, tablename):
     """ create a table from the CREATE_TABLE_SQL statement
     :param conn: Connection object
@@ -45,14 +42,11 @@ def create_table(conn, CREATE_TABLE_SQL, tablename):
     :return:
     """
 
-
     try:
         c = conn.cursor()
         c.execute(CREATE_TABLE_SQL)
     except Error as e:
         print(e)
-
-
 
 
 def insert_into(conn, record, tablename):
@@ -63,11 +57,11 @@ def insert_into(conn, record, tablename):
     :return: project id
     """
 
-
     sql = f"INSERT INTO public_companies(cik, name, ticker, exchange) VALUES(?,?,?,?)"
     cur = conn.cursor()
 
-    try: cur.execute(sql, record)
+    try:
+        cur.execute(sql, record)
     except Exception as e:
         print(f"Error: Thrown\n {e} \n\n \
                 Above error, was thrown on following record: {record}")
@@ -76,13 +70,8 @@ def insert_into(conn, record, tablename):
     return cur.lastrowid
 
 
-
-
-
-
-
 def main(url, db):
-    
+
     database = tablename = db
 
     # request and read data file
@@ -92,7 +81,6 @@ def main(url, db):
     # process json from file to dict
     company_tickers_dict = json.loads(raw_data)
     ticker_data = company_tickers_dict['data']
-
 
     # create a database connection and table if not exist
     conn = create_connection(database)
@@ -105,8 +93,6 @@ def main(url, db):
             entry_id = insert_into(conn, entry, tablename)
 
 
-
-import time
 if __name__ == "__main__":
 
     start = time.perf_counter()
@@ -114,13 +100,8 @@ if __name__ == "__main__":
     url = config.COMPANY_TICKERS_EXCHANGE_URL
     main(url, database)
 
-
     database = f"{os.getcwd()}/db/company_tickers_mf.db"
     url = config.COMPANY_TICKERS_MF_URL
     main(url, database)
 
-
     print(f"Serial downloader took {time.perf_counter() - start} sec")
-
-
-
